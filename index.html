@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+		*{padding:0;margin:0;}
+		body{overflow: hidden;background-image: url(timg.jpg);}
+		#main{width:800px;height: 800px;position: absolute;left: 0;top: 0;margin: auto;right: 0;bottom: 0;background-color: #fff;opacity: .3;}
+		#star,#end{margin-right:20px;width:80px;height: 40px;font-family:"microsoft yahei"; line-height:40px;background-color: darksalmon;color: #fff;border:none;font-size: 16px;}
+		form{text-align: center;margin-top: 8px;}
+		</style>
+		<script type="text/javascript">
+		window.onload=function(){
+			//初始化设置
+		  	var cvs=document.getElementById('cvs');
+		  	var ctx=cvs.getContext('2d');
+		  	
+		  	/*var star=document.getElementById('start');
+		  	var end=document.getElementById('end');
+		  	
+		  	star.onkeydown=function(){
+		  		clearInterval(draw)
+		  	}*/
+		  	//设置场景
+		  	var sceneSize=40;
+		  	//设置网格
+		  	var size=20;
+		  	//设置贪吃蛇
+		  	var snake=[{x:10,y:12},{x:10,y:13},{x:10,y:14}];
+		  	//移动方向  0:←  1:↑  2:→  3:↓
+		  	var direction=1;
+		  	//果实
+		  	var flood=[];
+		  	
+		    var countFram=0;
+		    
+		    //绘制一帧
+		    function draw(){
+		    	ctx.clearRect(0,0,cvs.width,cvs.height);    //清除画布;
+		    	drawscene();    //绘制场景
+		    	drawsnake();     //绘制蛇
+		    	drawflood();
+		    	update(); //每一帧更新数据		    	
+		    }
+		    
+		    function update(){
+		    	move();
+		    	if(countFram%20==0){
+		    		generateflood();
+		    	}
+		    	countFram++;
+		    }
+		    
+		    function move(){
+		    	//蛇的身体移动
+		    	for(var i=snake.length-1;i>=1;i--){
+		    		//移动身体至上一节身体躲在位置
+		    		snake[i].x=snake[i-1].x;
+		    		snake[i].y=snake[i-1].y;
+		    	}
+		    	
+		    	//移动蛇头
+		    	switch(direction){
+		    		case 0:snake[0].x--;
+		    		break;
+		    		case 1:snake[0].y--;
+		    		break;
+		    		case 2:snake[0].x++;
+		    		break;
+		    		case 3:snake[0].y++;
+		    		break;
+		    	}
+		    	
+		    	//穿墙
+		    	if(snake[0].x>=sceneSize) snake[0].x=0;
+		    	if(snake[0].x<0) snake[0].x=sceneSize-1;
+		    	if(snake[0].y>=sceneSize) snake[0].y=0;
+		    	if(snake[0].y<0) snake[0].y=sceneSize-1;
+		    	
+		    	//进食
+		    	for(var i=0;i<flood.length;i++){
+		    		if(flood[i].x===snake[0].x && flood[i].y===snake[0].y){
+		    			//吃到了
+		    			flood.splice(i,1);
+		    			grow();
+		    		}
+		    	}
+		    	
+		    	//触碰到本身
+		    	for(var i=1;i<snake.length;i++){
+		    		if(snake[i].x===snake[0].x && snake[i].y===snake[0].y){
+		    			clearInterval(handle);
+		    			alert("Game Over!")
+		    		}
+		    	}
+		    }
+		    
+		    //绘制场景
+		    function drawscene(){
+		    	ctx.strokeStyle="black";
+		    	for(var x=0;x<sceneSize;x++){
+		    		for(var y=0;y<sceneSize;y++){
+		    			ctx.strokeRect(x*size,y*size,size,size);
+		    		}
+		    	}
+		    }
+		    
+		    //绘制蛇
+		    function drawsnake(){
+		    	ctx.fillStyle="red";
+		    	for(var i=0;i<snake.length;i++){
+		    		ctx.fillRect(snake[i].x*size,snake[i].y*size,size,size);
+		    	}
+		    }
+		    
+		    //绘制食物
+		    function drawflood(){
+		    	ctx.beginPath();
+		    	ctx.fillStyle="blueviolet";
+		    	ctx.lineCap='round';
+		    	ctx.stroke();
+		    	for(var i=0;i<flood.length;i++){
+		    	   ctx.fillRect(flood[i].x*size,flood[i].y*size,size,size);
+		    	}
+		    }
+		    
+		    //产生食物
+		    function generateflood(){
+		    	var x=parseInt(Math.random()*sceneSize);
+		    	var y=parseInt(Math.random()*sceneSize);
+		    	flood.push({x:x,y:y});
+		    }
+		    
+		    //身体增长
+		    function grow(){
+		    	var body={
+		    	  x:snake[snake.length-1].x,
+		    	  y:snake[snake.length-1].y		    	  
+		    	};
+		    	snake.push(body);
+		    };
+		    
+		    generateflood();
+		    generateflood();
+		    generateflood();
+		    
+		    var handle=setInterval(draw,200);
+		    
+		    window.onkeydown=function(e){
+		    	switch(e.keyCode){
+		    		case 37:if(direction!=2){
+		    			direction=0;
+		    		}
+		    		break;
+		    		case 38:if(direction!=3){
+		    			direction=1;
+		    		}
+		    		break;
+		    		case 39:if(direction!=0){
+		    			direction=2;
+		    		}
+		    		break;
+		    		case 40:if(direction!=1){
+		    			direction=3;
+		    		}
+		    		break;
+		    	}
+		    }
+		    
+		    
+		}
+		</script>
+	</head>
+	<body>
+		<div id="main">
+			<canvas id="cvs" width="800" height="800">不支持canvas</canvas>
+			<form>
+			 	<button type="button" id="star">开始</button>
+			    <button type="button" id="end">暂停</button>
+			</form>
+			
+		</div>
+		
+	</body>
+</html>
